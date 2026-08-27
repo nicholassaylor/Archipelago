@@ -764,7 +764,7 @@ def _mp_open_filename(res: "multiprocessing.Queue[str | None]", *args: Any) -> N
     res.put(open_filename(*args))
 
 
-def _mp_save_filename(res: "multiprocessing.Queue[typing.Optional[str]]", *args: Any) -> None:
+def _mp_save_filename(res: "multiprocessing.Queue[str | None]", *args: Any) -> None:
     if is_kivy_running():
         raise RuntimeError("kivy should not be running in multiprocess")
     res.put(save_filename(*args))
@@ -821,8 +821,8 @@ def open_filename(title: str, filetypes: Iterable[tuple[str, Iterable[str]]], su
             root.destroy()
 
 
-def save_filename(title: str, filetypes: typing.Iterable[typing.Tuple[str, typing.Iterable[str]]], suggest: str = "") \
-        -> typing.Optional[str]:
+def save_filename(title: str, filetypes: Iterable[tuple[str, Iterable[str]]], suggest: str = "") \
+        -> str | None:
     logging.info(f"Opening file save dialog for {title}.")
 
     if is_linux:
@@ -851,7 +851,7 @@ def save_filename(title: str, filetypes: typing.Iterable[typing.Tuple[str, typin
             # on macOS, mixing kivy and tk does not work, so spawn a new process
             # FIXME: performance of this is pretty bad, and we should (also) look into alternatives
             from multiprocessing import Process, Queue
-            res: "Queue[typing.Optional[str]]" = Queue()
+            res: "Queue[str | None]" = Queue()
             Process(target=_mp_save_filename, args=(res, title, filetypes, suggest)).start()
             return res.get()
         try:

@@ -7,7 +7,7 @@ import sys
 import time
 from collections.abc import Callable, Iterable, Mapping
 from random import Random
-from typing import Any, ClassVar, TextIO, TYPE_CHECKING, Type
+from typing import Any, ClassVar, Self, TextIO, TYPE_CHECKING, Type
 
 from BaseClasses import CollectionState, Entrance
 from Options import item_and_loc_options, ItemsAccessibility, OptionGroup, PerGameCommonOptions

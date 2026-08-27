@@ -9,7 +9,7 @@ import secrets
 import warnings
 from argparse import Namespace
 from collections import Counter, deque, defaultdict
-from collections.abc import Callable, Collection, Iterable, Iterator, Mapping, MutableSequence, Set as AbstractSet
+from collections.abc import Callable, Collection, Iterable, Iterator, Mapping, MutableSequence
 from enum import IntEnum, IntFlag
 from typing import Any, ClassVar, Literal, NamedTuple, Protocol, TYPE_CHECKING, overload
 
@@ -864,7 +864,7 @@ class CollectionState:
                         "Please switch over to sweep_for_advancements.")
         return self.sweep_for_advancements(locations)
 
-    def _sweep_for_advancements_impl(self, advancements_per_player: List[Tuple[int, List[Location]]],
+    def _sweep_for_advancements_impl(self, advancements_per_player: list[tuple[int, list[Location]]],
                                      yield_each_sweep: bool) -> Iterator[None]:
         """
         The implementation for sweep_for_advancements is separated here because it returns a generator due to the use
@@ -878,7 +878,7 @@ class CollectionState:
         # sweep is finished.
         checking_if_finished = False
         while players_to_check:
-            next_advancements_per_player: List[Tuple[int, List[Location]]] = []
+            next_advancements_per_player: list[tuple[int, list[Location]]] = []
             next_players_to_check = set()
 
             for player, locations in advancements_per_player:
@@ -888,8 +888,8 @@ class CollectionState:
 
                 # Accessibility of each location is checked first because a player's region accessibility cache becomes
                 # stale whenever one of their own items is collected into the state.
-                reachable_locations: List[Location] = []
-                unreachable_locations: List[Location] = []
+                reachable_locations: list[Location] = []
+                unreachable_locations: list[Location] = []
                 for location in locations:
                     if location.can_reach(self):
                         # Locations containing items that do not belong to `player` could be collected immediately
@@ -938,17 +938,17 @@ class CollectionState:
                 yield
 
     @overload
-    def sweep_for_advancements(self, locations: Optional[Iterable[Location]] = None, *,
+    def sweep_for_advancements(self, locations: Iterable[Location] | None = None, *,
                                yield_each_sweep: Literal[True],
-                               checked_locations: Optional[Set[Location]] = None) -> Iterator[None]: ...
+                               checked_locations: set[Location] | None = None) -> Iterator[None]: ...
 
     @overload
-    def sweep_for_advancements(self, locations: Optional[Iterable[Location]] = None,
+    def sweep_for_advancements(self, locations: Iterable[Location] | None = None,
                                yield_each_sweep: Literal[False] = False,
-                               checked_locations: Optional[Set[Location]] = None) -> None: ...
+                               checked_locations: set[Location] | None = None) -> None: ...
 
-    def sweep_for_advancements(self, locations: Optional[Iterable[Location]] = None, yield_each_sweep: bool = False,
-                               checked_locations: Optional[Set[Location]] = None) -> Optional[Iterator[None]]:
+    def sweep_for_advancements(self, locations: Iterable[Location] | None = None, yield_each_sweep: bool = False,
+                               checked_locations: set[Location] | None = None) -> Iterator[None] | None:
         """
         Sweep through the locations that contain uncollected advancement items, collecting the items into the state
         until there are no more reachable locations that contain uncollected advancement items.
@@ -963,7 +963,7 @@ class CollectionState:
 
         # Since the sweep loop usually performs many iterations, the locations are filtered in advance.
         # A list of tuples is used, instead of a dictionary, because it is faster to iterate.
-        advancements_per_player: List[Tuple[int, List[Location]]]
+        advancements_per_player: list[tuple[int, list[Location]]]
         if locations is None:
             # `location.advancement` can only be True for filled locations, so unfilled locations are filtered out.
             advancements_per_player = []
@@ -974,7 +974,7 @@ class CollectionState:
                     advancements_per_player.append((player, filtered_locations))
         else:
             # Filter and separate the locations into a list for each player.
-            advancements_per_player_dict: Dict[int, List[Location]] = defaultdict(list)
+            advancements_per_player_dict: dict[int, list[Location]] = defaultdict(list)
             for location in locations:
                 if location.advancement and location not in checked_locations:
                     advancements_per_player_dict[location.player].append(location)
@@ -1453,7 +1453,7 @@ class Region:
         return entrance
 
     def add_exits(self, exits: Iterable[str] | Mapping[str, str | None],
-                  rules: Mapping[str, CollectionRule | Rule[Any]] | None = None) -> List[Entrance]:
+                  rules: Mapping[str, CollectionRule | Rule[Any]] | None = None) -> list[Entrance]:
         """
         Connects current region to regions in exit dictionary. Passed region names must exist first.
 
